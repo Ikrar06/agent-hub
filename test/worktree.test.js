@@ -48,7 +48,8 @@ describe('worktree', () => {
     assert.ok(/^agent\/test-slug-\d{8}-\d{6}$/.test(result.branch));
     // 4. git worktree list --porcelain should include the worktree path
     const worktreeList = await exec('git', ['-C', repo, 'worktree', 'list', '--porcelain']);
-    assert.ok(worktreeList.stdout.includes(result.dir));
+    const worktreeDir = result.dir.replace(/\\/g, '/');
+    assert.ok(worktreeList.stdout.includes(worktreeDir));
     // 5. Original repo's HEAD should still be main
     const headResult = await exec('git', ['-C', repo, 'rev-parse', '--abbrev-ref', 'HEAD']);
     assert.equal(headResult.stdout.trim(), 'main');
