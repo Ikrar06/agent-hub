@@ -19,19 +19,33 @@ describe('openCodeConfig', () => {
     });
   });
 
-  it('should get agent config', async () => {
+  it('should get agent config for all agent types', async () => {
     const templatePath = join(process.cwd(), 'opencode', 'opencode.template.json');
     const values = {
       provider: 'llama.cpp',
       modelId: 'qwen3-6b-35b'
     };
     const baseConfig = await loadOpenCodeConfig(templatePath, values);
-    const agentConfig = getAgentConfig('lead', baseConfig);
-    assert.deepEqual(agentConfig, {
-      provider: 'llama.cpp',
-      model: { id: 'qwen3-6b-35b' },
-      agentType: 'lead'
-    });
+
+    // Test all agent types
+    const agentTypes = ['lead', 'coder', 'tester', 'fixer', 'reviewer', 'documenter', 'pr-writer'];
+    for (const agentType of agentTypes) {
+      const agentConfig = getAgentConfig(agentType, baseConfig);
+      assert.deepEqual(agentConfig, {
+        provider: 'llama.cpp',
+        model: { id: 'qwen3-6b-35b' },
+        agentType: agentType
+      });
+    }
+  });
+
+  it('should handle missing values gracefully', async () => {
+    const templatePath = join(process.cwd(), 'opencode', 'opencode.template.json');
+    const values = {}; // Empty values
+    const config = await loadOpenCodeConfig(templatePath, values);
+    // Should still return valid config based on template defaults
+    assert.ok(config);
+    assert.ok(config.provider || config.model);
   });
 
   it('should not contain hardcoded global OpenCode path', async () => {

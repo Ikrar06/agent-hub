@@ -3,181 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Hub Monitor - Run Detail</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #0066cc; text-decoration: none; }
-        .back-link:hover { text-decoration: underline; }
-        .section { margin-bottom: 30px; }
-        .section h2 { color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .content { background: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-break: break-all; }
-        .timestamp { color: #666; font-size: 0.9em; }
-    </style>
+    <title>Agent Hub — Run Detail</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%23d97757'/><path d='M12 6.5v11M6.5 12h11' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/></svg>">
 </head>
 <body>
-    <a href="/" class="back-link">&larr; Back to Runs List</a>
-    <h1>Run Detail</h1>
-    <div class="section">
-        <h2>Run Information</h2>
-        <div class="content" id="runInfo">Loading...</div>
-    </div>
-    <div class="section">
-        <h2>Events</h2>
-        <div class="content" id="runEvents">Loading...</div>
-    </div>
-    <div class="section">
-        <h2>Logs</h2>
-        <div class="content" id="runLogs">Loading...</div>
-    </div>
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                    <path d="M12 4.5v15M4.5 12h15"/>
+                </svg>
+            </span>
+            Agent Hub
+            <span class="brand-sub">Run detail</span>
+        </a>
+        <span class="topbar-spacer"></span>
+        <a class="btn btn-ghost" href="/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            All runs
+        </a>
+        <button class="btn btn-ghost btn-icon theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+    </header>
+
+    <main class="page">
+        <div id="loadingState" class="card">
+            <div class="state-block">
+                <div class="state-icon">
+                    <svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56"/></svg>
+                </div>
+                <p class="state-title">Loading run…</p>
+            </div>
+        </div>
+
+        <div id="errorState" class="card" style="display: none;">
+            <div class="state-block">
+                <div class="state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                </div>
+                <p class="state-title" id="errorTitle">Run not found</p>
+                <p class="state-hint">The run may have been cleaned up, or the ID is invalid. Check <code>agent status</code> for the list of active runs.</p>
+            </div>
+        </div>
+
+        <div id="content" style="display: none;">
+            <!-- Hero -->
+            <div class="card hero">
+                <div class="hero-top">
+                    <span class="pill status-unknown" id="statusPill">unknown</span>
+                    <span class="hero-id">
+                        <span id="runIdText">—</span>
+                        <button class="copy-btn" id="copyIdBtn" title="Copy full run ID" aria-label="Copy full run ID">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                        </button>
+                    </span>
+                    <span class="topbar-spacer"></span>
+                    <span class="live" id="liveIndicator" style="display: none;"><span class="live-dot"></span>Live</span>
+                </div>
+                <p class="hero-message placeholder" id="heroMessage">No message yet…</p>
+                <div class="hero-progress" id="heroProgressWrap" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-fill" id="heroProgressFill"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span id="heroProgressLabel">—</span>
+                        <span id="heroProgressPct">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta grid -->
+            <div class="section card">
+                <div class="section-head"><h2 class="section-title">Information</h2></div>
+                <div class="meta-grid" id="metaGrid"></div>
+            </div>
+
+            <!-- Events -->
+            <div class="section card" id="eventsCard" style="display: none;">
+                <div class="section-head">
+                    <h2 class="section-title">Events <span class="count-badge" id="eventsCount">0</span></h2>
+                </div>
+                <ul class="timeline" id="eventsList"></ul>
+            </div>
+
+            <!-- Logs -->
+            <div class="section card" id="logsCard" style="display: none;">
+                <div class="section-head">
+                    <h2 class="section-title">agent.log</h2>
+                    <label class="live" style="cursor: pointer;">
+                        <input type="checkbox" id="followLogs" checked style="accent-color: var(--accent); margin: 0;">
+                        Follow tail
+                    </label>
+                </div>
+                <pre class="log-view" id="logView">Loading…</pre>
+            </div>
+
+            <div class="footnote">
+                <span>Started <span id="startedNote">—</span></span>
+                <span>refreshed every 2s</span>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const runId = urlParams.get('id');
-        if (!runId) {
-            document.getElementById('runInfo').textContent = 'No run ID specified';
-            return;
+        // ---------- Theme ----------
+        const themeToggle = document.getElementById('themeToggle');
+        const storedTheme = localStorage.getItem('agent-hub-theme');
+        if (storedTheme === 'dark' || storedTheme === 'light') {
+            document.documentElement.dataset.theme = storedTheme;
+        }
+        themeToggle.addEventListener('click', () => {
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const current = document.documentElement.dataset.theme || (systemDark ? 'dark' : 'light');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = next;
+            localStorage.setItem('agent-hub-theme', next);
+        });
+
+        // ---------- Helpers ----------
+        const $ = (id) => document.getElementById(id);
+
+        function statusClass(state) {
+            const s = state || 'unknown';
+            if (s === 'waiting_gate') return 'waiting';
+            return ['running','waiting','blocked','failed','done','queued','stalled'].includes(s) ? s : 'unknown';
         }
 
-        async function loadRunDetail() {
-            try {
-                const response = await fetch(`/api/runs/${runId}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch run: ${response.status}`);
-                }
-                const run = await response.json();
+        function isLive(state) {
+            return state === 'running' || state === 'waiting_gate' || state === 'waiting' || state === 'blocked';
+        }
 
-                // Display basic info
-                const infoDiv = document.getElementById('runInfo');
-                infoDiv.innerHTML = ''; // Clear existing content
+        function fmtDate(ts) {
+            if (!ts) return '—';
+            const d = new Date(ts);
+            return isNaN(d) ? '—' : d.toLocaleString();
+        }
 
-                const createParagraphWithLabel = (label, value, isHtml = false) => {
-                    const p = document.createElement('p');
-                    const strong = document.createElement('strong');
-                    strong.textContent = label;
-                    p.appendChild(strong);
-                    p.appendChild(document.createTextNode(' '));
+        function fmtDuration(fromTs, toTs) {
+            if (!fromTs) return '—';
+            const end = toTs ? new Date(toTs).getTime() : Date.now();
+            const start = new Date(fromTs).getTime();
+            if (isNaN(start) || isNaN(end)) return '—';
+            let s = Math.max(0, Math.floor((end - start) / 1000));
+            const h = Math.floor(s / 3600); s %= 3600;
+            const m = Math.floor(s / 60); s %= 60;
+            if (h) return `${h}h ${m}m`;
+            if (m) return `${m}m ${s}s`;
+            return `${s}s`;
+        }
 
-                    if (isHtml && typeof value === 'string' && value.includes('<a href=')) {
-                        // Handle the special case for PR URL
-                        const span = document.createElement('span');
-                        span.innerHTML = value; // This is safe as we control the value
-                        p.appendChild(span);
-                    } else {
-                        if (value instanceof DocumentFragment) {
-                            p.appendChild(value);
-                        } else {
-                            p.appendChild(document.createTextNode(value));
-                        }
+        function el(tag, className, text) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined) node.textContent = text;
+            return node;
+        }
+
+        function metaItem(label, value, mono) {
+            const item = el('div', 'meta-item');
+            item.appendChild(el('div', 'meta-label', label));
+            const val = el('div', 'meta-value' + (mono ? ' mono' : ''), value);
+            item.appendChild(val);
+            return item;
+        }
+
+        function metaLink(label, href, text) {
+            const item = el('div', 'meta-item');
+            item.appendChild(el('div', 'meta-label', label));
+            const val = el('div', 'meta-value');
+            const a = el('a', null, text);
+            a.href = href;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            val.appendChild(a);
+            item.appendChild(val);
+            return item;
+        }
+
+        const EVENT_DOT_KINDS = {
+            gate: 't-gate',
+            error: 't-error',
+            failed: 't-error',
+            blocked: 't-gate',
+            done: 't-done',
+            complete: 't-done',
+            pr: 't-done',
+            agent: 't-agent',
+            stage: 't-agent'
+        };
+
+        function dotKindFor(type) {
+            const t = (type || '').toLowerCase();
+            for (const [key, cls] of Object.entries(EVENT_DOT_KINDS)) {
+                if (t.includes(key)) return cls;
+            }
+            return '';
+        }
+
+        // ---------- State ----------
+        const urlParams = new URLSearchParams(window.location.search);
+        const runId = urlParams.get('id');
+        let currentRun = null;
+
+        function showError(title) {
+            $('loadingState').style.display = 'none';
+            $('content').style.display = 'none';
+            $('errorState').style.display = '';
+            if (title) $('errorTitle').textContent = title;
+        }
+
+        // ---------- Render status ----------
+        function renderStatus(run) {
+            const cls = statusClass(run.state);
+            const pill = $('statusPill');
+            pill.className = `pill status-${cls}` + (isLive(run.state) ? ' is-live' : '');
+            pill.textContent = cls === 'waiting' ? 'waiting gate' : cls;
+
+            const displayId = run.id || runId || '';
+            $('runIdText').textContent = displayId.length > 14 ? displayId.substring(0, 14) + '…' : (displayId || '—');
+
+            const msg = $('heroMessage');
+            if (run.message) {
+                msg.textContent = run.message;
+                msg.classList.remove('placeholder');
+            } else {
+                msg.textContent = 'No message yet…';
+                msg.classList.add('placeholder');
+            }
+
+            $('liveIndicator').style.display = isLive(run.state) ? '' : 'none';
+
+            if (run.task_index !== undefined && run.task_total) {
+                const done = Math.min(run.task_index + (run.state === 'done' ? 0 : 1), run.task_total);
+                const pct = Math.min(100, Math.round((done / run.task_total) * 100));
+                $('heroProgressWrap').style.display = '';
+                const fill = $('heroProgressFill');
+                fill.className = 'progress-fill' +
+                    (run.state === 'done' ? ' state-done' : run.state === 'failed' ? ' state-failed' : '');
+                fill.style.width = pct + '%';
+                $('heroProgressLabel').textContent = `Task ${done} of ${run.task_total}`;
+                $('heroProgressPct').textContent = pct + '%';
+            } else {
+                $('heroProgressWrap').style.display = 'none';
+            }
+
+            // Meta grid
+            const grid = $('metaGrid');
+            grid.innerHTML = '';
+            grid.appendChild(metaItem('Repository', run.repo || '—'));
+            grid.appendChild(metaItem('Branch', run.branch || '—', true));
+            if (run.base_sha) grid.appendChild(metaItem('Base SHA', run.base_sha.substring(0, 7), true));
+            grid.appendChild(metaItem('Stage', run.stage || '—'));
+            grid.appendChild(metaItem('Agent', run.agent || '—'));
+            grid.appendChild(metaItem('Model', run.model || '—', true));
+            grid.appendChild(metaItem('Started', fmtDate(run.started_at)));
+            if (run.last_heartbeat) {
+                grid.appendChild(metaItem('Last heartbeat', fmtDate(run.last_heartbeat)));
+                grid.appendChild(metaItem('Elapsed', fmtDuration(run.started_at, run.last_heartbeat)));
+            }
+            grid.appendChild(metaItem('Fix round', String(run.fix_round ?? 0)));
+            grid.appendChild(metaItem('Review round', String(run.review_round ?? 0)));
+            if (run.pr_url) grid.appendChild(metaLink('Pull request', run.pr_url, 'View PR ↗'));
+        }
+
+        // ---------- Render events ----------
+        function renderEvents(text) {
+            const card = $('eventsCard');
+            const list = $('eventsList');
+            list.innerHTML = '';
+
+            if (!text || !text.trim()) {
+                card.style.display = 'none';
+                return;
+            }
+
+            const lines = text.trim().split('\n');
+            let shown = 0;
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                let entry = null;
+                try { entry = JSON.parse(line); } catch (e) { /* raw line */ }
+
+                const li = el('li', 'timeline-item');
+
+                if (entry && typeof entry === 'object') {
+                    const type = entry.type || entry.event || entry.stage || entry.state || 'event';
+                    const ts = entry.ts || entry.timestamp || entry.time;
+
+                    const dot = el('span', 'timeline-dot ' + dotKindFor(type));
+                    li.appendChild(dot);
+
+                    const body = el('div', 'timeline-body');
+                    const head = el('div', 'timeline-head');
+                    head.appendChild(el('span', 'timeline-type', type));
+
+                    // Primary human-readable text, if any
+                    const text = entry.detail || entry.message || entry.notes || entry.reason;
+                    if (text) {
+                        head.appendChild(el('span', 'timeline-detail', String(text)));
                     }
-                    return p;
-                };
 
-                // Add each piece of info
-                infoDiv.appendChild(createParagraphWithLabel('Run ID:', run.id || '-'));
-                infoDiv.appendChild(createParagraphWithLabel('Repository:', run.repo || '-'));
-                infoDiv.appendChild(createParagraphWithLabel('Branch:', run.branch || '-'));
-                infoDiv.appendChild(createParagraphWithLabel('Base SHA:', run.base_sha || '-'));
-
-                const startTimePara = document.createElement('p');
-                const startTimeStrong = document.createElement('strong');
-                startTimeStrong.textContent = 'Start Time:';
-                startTimePara.appendChild(startTimeStrong);
-                startTimePara.appendChild(document.createTextNode(' '));
-                const startTimeSpan = document.createElement('span');
-                startTimeSpan.className = 'timestamp';
-                startTimeSpan.textContent = run.started_at ? new Date(run.started_at).toLocaleString() : '-';
-                startTimePara.appendChild(startTimeSpan);
-                infoDiv.appendChild(startTimePara);
-
-                const lastHeartbeatPara = document.createElement('p');
-                const lastHeartbeatStrong = document.createElement('strong');
-                lastHeartbeatStrong.textContent = 'Last Heartbeat:';
-                lastHeartbeatPara.appendChild(lastHeartbeatStrong);
-                lastHeartbeatPara.appendChild(document.createTextNode(' '));
-                const lastHeartbeatSpan = document.createElement('span');
-                lastHeartbeatSpan.className = 'timestamp';
-                lastHeartbeatSpan.textContent = run.last_heartbeat ? new Date(run.last_heartbeat).toLocaleString() : '-';
-                lastHeartbeatPara.appendChild(lastHeartbeatSpan);
-                infoDiv.appendChild(lastHeartbeatPara);
-
-                infoDiv.appendChild(createParagraphWithLabel('Current Stage:', run.stage || '-'));
-                infoDiv.appendChild(createParagraphWithLabel('Current Agent:', run.agent || '-'));
-                infoDiv.appendChild(createParagraphWithLabel('Current Model:', run.model || '-'));
-
-                const taskIndexPara = document.createElement('p');
-                const taskIndexStrong = document.createElement('strong');
-                taskIndexStrong.textContent = 'Task Index:';
-                taskIndexPara.appendChild(taskIndexStrong);
-                taskIndexPara.appendChild(document.createTextNode(' '));
-                const taskIndexText = document.createTextNode(
-                    `${run.task_index !== undefined ? run.task_index + 1 : '-'}/${run.task_total || '-'}`);
-                taskIndexPara.appendChild(taskIndexText);
-                infoDiv.appendChild(taskIndexPara);
-
-                infoDiv.appendChild(createParagraphWithLabel('Fix Round:', run.fix_round || 0));
-                infoDiv.appendChild(createParagraphWithLabel('Review Round:', run.review_round || 0));
-
-                const statePara = document.createElement('p');
-                const stateStrong = document.createElement('strong');
-                stateStrong.textContent = 'State:';
-                statePara.appendChild(stateStrong);
-                statePara.appendChild(document.createTextNode(' '));
-                const stateSpan = document.createElement('span');
-                stateSpan.className = `status-${run.state || 'unknown'}`;
-                stateSpan.textContent = run.state || '-';
-                statePara.appendChild(stateSpan);
-                infoDiv.appendChild(statePara);
-
-                infoDiv.appendChild(createParagraphWithLabel('Message:', run.message || '-'));
-
-                const prUrlPara = document.createElement('p');
-                const prUrlStrong = document.createElement('strong');
-                prUrlStrong.textContent = 'PR URL:';
-                prUrlPara.appendChild(prUrlStrong);
-                prUrlPara.appendChild(document.createTextNode(' '));
-                if (run.pr_url) {
-                    const prLink = document.createElement('a');
-                    prLink.href = run.pr_url;
-                    prLink.target = '_blank';
-                    prLink.textContent = 'View PR';
-                    prUrlPara.appendChild(prLink);
+                    // Remaining fields as compact JSON
+                    const rest = { ...entry };
+                    delete rest.type; delete rest.event; delete rest.stage; delete rest.state;
+                    delete rest.ts; delete rest.timestamp; delete rest.time;
+                    delete rest.detail; delete rest.message; delete rest.notes; delete rest.reason;
+                    const detail = JSON.stringify(rest);
+                    if (detail && detail !== '{}') {
+                        head.appendChild(el('span', 'timeline-detail',
+                            detail.length > 200 ? detail.slice(0, 200) + '…' : detail));
+                    }
+                    head.appendChild(el('span', 'timeline-time', ts ? fmtDate(ts) : ''));
+                    body.appendChild(head);
+                    li.appendChild(body);
                 } else {
-                    prUrlPara.appendChild(document.createTextNode('-'));
-                }
-                infoDiv.appendChild(prUrlPara);
-
-                // Try to load events.jsonl
-                try {
-                    const eventsResponse = await fetch(`/api/runs/${runId}/events.jsonl`);
-                    if (eventsResponse.ok) {
-                        const eventsText = await eventsResponse.text();
-                        document.getElementById('runEvents').textContent = eventsText || 'No events available';
-                    } else {
-                        document.getElementById('runEvents').textContent = 'Events not available';
-                    }
-                } catch (e) {
-                    document.getElementById('runEvents').textContent = 'Error loading events';
+                    const dot = el('span', 'timeline-dot');
+                    li.appendChild(dot);
+                    const body = el('div', 'timeline-body');
+                    body.appendChild(el('span', 'timeline-raw', line));
+                    li.appendChild(body);
                 }
 
-                // Try to load agent.log
-                try {
-                    const logResponse = await fetch(`/api/runs/${runId}/agent.log`);
-                    if (logResponse.ok) {
-                        const logText = await logResponse.text();
-                        document.getElementById('runLogs').textContent = logText || 'No log available';
-                    } else {
-                        document.getElementById('runLogs').textContent = 'Log not available';
-                    }
-                } catch (e) {
-                    document.getElementById('runLogs').textContent = 'Error loading log';
-                }
-            } catch (error) {
-                document.getElementById('runInfo').textContent = `Error loading run detail: ${error.message}`;
+                list.appendChild(li);
+                shown++;
+            }
+
+            $('eventsCount').textContent = String(shown);
+            card.style.display = shown > 0 ? '' : 'none';
+        }
+
+        // ---------- Render logs ----------
+        function renderLogs(text) {
+            const card = $('logsCard');
+            const view = $('logView');
+            if (text === null) {
+                card.style.display = 'none';
+                return;
+            }
+            const prev = view.textContent;
+            view.textContent = text || '(empty log)';
+            card.style.display = '';
+            if ($('followLogs').checked && text !== prev) {
+                view.scrollTop = view.scrollHeight;
             }
         }
 
-        loadRunDetail();
+        // ---------- Data ----------
+        async function load() {
+            if (!runId) {
+                showError('No run ID specified');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/runs/${encodeURIComponent(runId)}`);
+                if (res.status === 404) { showError('Run not found'); return; }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const run = await res.json();
+                currentRun = run;
+
+                $('loadingState').style.display = 'none';
+                $('errorState').style.display = 'none';
+                $('content').style.display = '';
+                renderStatus(run);
+
+                $('startedNote').textContent = fmtDate(run.started_at);
+            } catch (err) {
+                showError('Could not load run');
+                return;
+            }
+
+            // Events & logs (best effort, keep page usable if missing)
+            try {
+                const evRes = await fetch(`/api/runs/${encodeURIComponent(runId)}/events.jsonl`);
+                renderEvents(evRes.ok ? await evRes.text() : null);
+            } catch (e) { renderEvents(null); }
+
+            try {
+                const logRes = await fetch(`/api/runs/${encodeURIComponent(runId)}/agent.log`);
+                renderLogs(logRes.ok ? await logRes.text() : null);
+            } catch (e) { renderLogs(null); }
+        }
+
+        // ---------- Copy ID ----------
+        $('copyIdBtn').addEventListener('click', async () => {
+            if (!currentRun || !currentRun.id) return;
+            try {
+                await navigator.clipboard.writeText(currentRun.id);
+                $('copyIdBtn').style.color = 'var(--c-running)';
+                setTimeout(() => { $('copyIdBtn').style.color = ''; }, 800);
+            } catch (e) { /* clipboard unavailable */ }
+        });
+
+        let pollTimer = setInterval(load, 2000);
+        document.addEventListener('visibilitychange', () => {
+            clearInterval(pollTimer);
+            if (!document.hidden) {
+                load();
+                pollTimer = setInterval(load, 2000);
+            }
+        });
+
+        load();
     </script>
 </body>
 </html>

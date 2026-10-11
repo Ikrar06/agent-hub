@@ -75,6 +75,20 @@ Ikuti dokumentasi resmi OpenCode untuk instalasi:
 - Jalankan `agent doctor` untuk memeriksa bahwa semua komponen yang diperlukan tersedia dan berfungsi.
 - Ikuti rekomendasi perbaikan jika ada yang tidak terdeteksi.
 
+### 10. Instal Ekstensi VS Code `agent-hub-vscode`
+- Dalam direktori agent-hub, jalankan:
+  ```
+  agent vscode-install --extension
+  ```
+- Ini akan membuat ekstensi VS Code `agent-hub-vscode` yang terinstal.
+- Ekstensi ini menyediakan panel sidebar untuk mengontrol agent runs dengan fitur:
+  - Kotak prompt untuk input user
+  - Timeline tahap agent yang sedang berjalan
+  - Kontrol gate (waiting_gate/blocked)
+  - Kotak steering untuk input selama proses
+  - Tombol stop/resume untuk mengontrol agent
+- Verifikasi dengan membuka VS Code dan melihat apakah panel Agent Hub muncul di sidebar.
+
 ## Catatan Penting
 
 - Pastikan variabel lingkungan `AGENT_HUB_HOME` dan `AGENT_HUB_VSCODE_USER_DIR` tidak disetelah jika Anda ingin menggunakan nilai default (`~/.agent-hub` dan `~/.vscode` masing-masing). Jika Anda ingin mengisolasi data, setel variabel lingkungan ini sebelum menjalankan perintah agent.

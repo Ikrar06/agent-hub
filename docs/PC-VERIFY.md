@@ -55,7 +55,18 @@ Document ini berisi daftar hal yang harus diverifikasi di PC Windows untuk memas
 - **Perintah**: `agent model status`
 - **Hasil yang Diharapkan**: Menampilkan status llama-server (berjalan atau tidak) dan konfigurasi yang sedang digunakan
 
-## 10. Verifikasi Isolasi Lingkungan (Opsional)
+## 10. Verifikasi Ekstensi VS Code `agent-hub-vscode`
+- **Perintah**: `code` (buka VS Code secara manual)
+- **Hasil yang Diharapkan**: 
+  - VS Code terbuka dan panel sidebar "Agent Hub" terlihat di bagian kiri
+  - Panel berisi:
+    * Kotak prompt untuk input user
+    * Status bar yang menunjukkan status agent
+    * Timeline tahap agent yang sedang berjalan
+    * Kotak steering untuk input selama proses
+    * Tombol stop/resume untuk mengontrol agent
+
+## 11. Verifikasi Isolasi Lingkungan (Opsional)
 - **Perintah**: `echo %AGENT_HUB_HOME%`
 - **Hasil yang Diharapkan**: Menampilkan path direktori untuk data runtime agent-hub (default: `%USERPROFILE%\.agent-hub`)
 - **Perintah**: `echo %AGENT_HUB_VSCODE_USER_DIR%`

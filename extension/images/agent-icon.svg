@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Hub-and-spoke mark: rendered as a mask by VS Code, so shapes must be solid -->
+  <g stroke="#000" stroke-width="1.7" stroke-linecap="round" fill="none">
+    <path d="M12 6.2v3.2M12 14.6v3.2M6.2 12h3.2M14.6 12h3.2"/>
+  </g>
+  <circle cx="12" cy="12" r="2.7" fill="#000"/>
+  <circle cx="12" cy="3.9" r="1.9" fill="#000"/>
+  <circle cx="20.1" cy="12" r="1.9" fill="#000"/>
+  <circle cx="12" cy="20.1" r="1.9" fill="#000"/>
+  <circle cx="3.9" cy="12" r="1.9" fill="#000"/>
+</svg>

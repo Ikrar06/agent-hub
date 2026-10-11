@@ -64,4 +64,52 @@ describe('lock', () => {
     // Release
     await release(lock);
   });
+
+  it('should handle concurrent lock acquisition attempts', async () => {
+    const home = join(tmpdir(), 'agent-hub-lock-test-concurrent-' + Date.now());
+
+    // Start multiple concurrent acquire attempts
+    const promises = [];
+    for (let i = 0; i < 5; i++) {
+      promises.push(
+        acquire(home, { run_id: `test-${i}`, repo: '.' })
+          .then(lock => ({ lock, error: null }))
+          .catch(error => ({ lock: null, error }))
+      );
+    }
+
+    const results = await Promise.all(promises);
+
+    // Exactly one should succeed, others should fail with ELOCKED
+    const successful = results.filter(r => r.lock !== null);
+    const failed = results.filter(r => r.lock === null);
+
+    assert.equal(successful.length, 1);
+    assert.equal(failed.length, 4);
+
+    // All failed attempts should have ELOCKED error
+    for (const result of failed) {
+      assert.ok(result.error);
+      assert.equal(result.error.code, 'ELOCKED');
+    }
+
+    // Clean up the successful lock
+    await release(successful[0].lock);
+  });
+
+  it('should properly report lock status via isAlive', async () => {
+    const home = join(tmpdir(), 'agent-hub-lock-test-alive-' + Date.now());
+    const info = { run_id: 'test-alive', repo: '.' };
+
+    // Initially, no lock should exist
+    assert.equal(await isAlive(home), false);
+
+    // After acquiring lock, isAlive should return true
+    const lock = await acquire(home, info);
+    assert.equal(await isAlive(home), true);
+
+    // After releasing lock, isAlive should return false
+    await release(lock);
+    assert.equal(await isAlive(home), false);
+  });
 });

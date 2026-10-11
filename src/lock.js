@@ -2,9 +2,26 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-export const isAlive = (pid) => {
-  try { process.kill(pid, 0); return true; }
-  catch (e) { return e.code === 'EPERM'; }
+export const isAlive = async (target) => {
+  // If target is a number, treat it as a PID and check if process is alive
+  if (typeof target === 'number') {
+    try { process.kill(target, 0); return true; }
+    catch (e) { return e.code === 'EPERM'; }
+  }
+  // If target is a string, treat it as a home directory and check for active lock
+  if (typeof target === 'string') {
+    try {
+      const lockFile = path.join(target, 'locks', 'pipeline.lock');
+      const content = await fs.readFile(lockFile, 'utf8');
+      const holder = JSON.parse(content);
+      return isAlive(holder.pid);
+    } catch (e) {
+      // If lock file doesn't exist or can't be read, no active lock
+      return false;
+    }
+  }
+  // For any other type, return false
+  return false;
 };
 
 export async function acquire(home, info) {
@@ -20,7 +37,7 @@ export async function acquire(home, info) {
     let holder = null;
     try { holder = JSON.parse(await fs.readFile(file, 'utf8')); } catch {}
     if (!holder) { await sleep(50); continue; }      // file baru dibuat, isi belum tertulis
-    if (isAlive(holder.pid)) {
+    if (await isAlive(holder.pid)) {
       const err = new Error('pipeline sedang berjalan'); err.code = 'ELOCKED'; err.holder = holder; throw err;
     }
     await fs.rm(file, { force: true });              // basi: pemegang sudah mati
