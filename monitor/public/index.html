@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Hub Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .status-running { color: green; }
+        .status-waiting { color: orange; }
+        .status-blocked { color: red; }
+        .status-failed { color: darkred; }
+        .status-done { color: blue; }
+        .status-queued { color: purple; }
+    </style>
+</head>
+<body>
+    <h1>Agent Hub Monitor</h1>
+    <p>Last updated: <span id="lastUpdated">--</span></p>
+    <table id="runsTable">
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Repo</th>
+                <th>Branch</th>
+                <th>Stage</th>
+                <th>Agent</th>
+                <th>Model</th>
+                <th>Task</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be inserted by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        async function loadRuns() {
+            try {
+                const response = await fetch('/api/runs');
+                const runs = await response.json();
+                const tbody = document.querySelector('#runsTable tbody');
+                tbody.innerHTML = ''; // Clear existing rows
+
+                runs.forEach(run => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${run.id || '-'}</td>
+                        <td>${run.repo || '-'}</td>
+                        <td>${run.branch || '-'}</td>
+                        <td>${run.stage || '-'}</td>
+                        <td>${run.agent || '-'}</td>
+                        <td>${run.model || '-'}</td>
+                        <td>${run.task_index !== undefined && run.task_total !== undefined ? `${run.task_index + 1}/${run.task_total}` : '-'}</td>
+                        <td class="status-${run.state || 'unknown'}">${run.state || '-'}</td>
+                    tr.onclick = () => {
+                        window.location.href = `/run.html?id=${run.id}`;
+                    };
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error loading runs:', error);
+                document.getElementById('lastUpdated').textContent = 'Error loading data';
+            }
+        }
+
+        // Load runs initially and then every 2 seconds
+        loadRuns();
+        setInterval(loadRuns, 2000);
+    </script>
+</body>
+</html>

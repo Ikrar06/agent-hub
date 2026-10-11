@@ -74,7 +74,7 @@
 
 ## Milestone 7: Dokumentasi Serah Terima dan README
 - **ID**: M7
-- **Judul**: Menyelesaikan dokumentasi serah terima ke PC dan README
+- **Judul**: [x] Menyelesaikan dokumentasi serah terima ke PC dan README
 - **File terkait**:
   - docs/SETUP-PC.md
   - docs/PC-VERIFY.md

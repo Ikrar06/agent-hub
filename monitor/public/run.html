@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Hub Monitor - Run Detail</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #0066cc; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .section { margin-bottom: 30px; }
+        .section h2 { color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .content { background: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-break: break-all; }
+        .timestamp { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">&larr; Back to Runs List</a>
+    <h1>Run Detail</h1>
+    <div class="section">
+        <h2>Run Information</h2>
+        <div class="content" id="runInfo">Loading...</div>
+    </div>
+    <div class="section">
+        <h2>Events</h2>
+        <div class="content" id="runEvents">Loading...</div>
+    </div>
+    <div class="section">
+        <h2>Logs</h2>
+        <div class="content" id="runLogs">Loading...</div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const runId = urlParams.get('id');
+        if (!runId) {
+            document.getElementById('runInfo').textContent = 'No run ID specified';
+            return;
+        }
+
+        async function loadRunDetail() {
+            try {
+                const response = await fetch(`/api/runs/${runId}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch run: ${response.status}`);
+                }
+                const run = await response.json();
+
+                // Display basic info
+                const infoDiv = document.getElementById('runInfo');
+                infoDiv.innerHTML = `
+                    <p><strong>Run ID:</strong> ${run.id || '-'}</p>
+                    <p><strong>Repository:</strong> ${run.repo || '-'}</p>
+                    <p><strong>Branch:</strong> ${run.branch || '-'}</p>
+                    <p><strong>Base SHA:</strong> ${run.base_sha || '-'}</p>
+                    <p><strong>Start Time:</strong> <span class="timestamp">${run.started_at ? new Date(run.started_at).toLocaleString() : '-'}</span></p>
+                    <p><strong>Last Heartbeat:</strong> <span class="timestamp">${run.last_heartbeat ? new Date(run.last_heartbeat).toLocaleString() : '-'}</span></p>
+                    <p><strong>Current Stage:</strong> ${run.stage || '-'}</p>
+                    <p><strong>Current Agent:</strong> ${run.agent || '-'}</p>
+                    <p><strong>Current Model:</strong> ${run.model || '-'}</p>
+                    <p><strong>Task Index:</strong> ${run.task_index !== undefined ? run.task_index + 1 : '-'}/${run.task_total || '-'}</p>
+                    <p><strong>Fix Round:</strong> ${run.fix_round || 0}</p>
+                    <p><strong>Review Round:</strong> ${run.review_round || 0}</p>
+                    <p><strong>State:</strong> <span class="status-${run.state || 'unknown'}">${run.state || '-'}</span></p>
+                    <p><strong>Message:</strong> ${run.message || '-'}</p>
+                    <p><strong>PR URL:</strong> ${run.pr_url ? `<a href="${run.pr_url}" target="_blank">View PR</a>` : '-'}</p>
+                `;
+
+                // Try to load events.jsonl
+                try {
+                    const eventsResponse = await fetch(`/api/runs/${runId}/events.jsonl`);
+                    if (eventsResponse.ok) {
+                        const eventsText = await eventsResponse.text();
+                        document.getElementById('runEvents').textContent = eventsText || 'No events available';
+                    } else {
+                        document.getElementById('runEvents').textContent = 'Events not available';
+                    }
+                } catch (e) {
+                    document.getElementById('runEvents').textContent = 'Error loading events';
+                }
+
+                // Try to load agent.log
+                try {
+                    const logResponse = await fetch(`/api/runs/${runId}/agent.log`);
+                    if (logResponse.ok) {
+                        const logText = await logResponse.text();
+                        document.getElementById('runLogs').textContent = logText || 'No log available';
+                    } else {
+                        document.getElementById('runLogs').textContent = 'Log not available';
+                    }
+                } catch (e) {
+                    document.getElementById('runLogs').textContent = 'Error loading log';
+                }
+            } catch (error) {
+                document.getElementById('runInfo').textContent = `Error loading run detail: ${error.message}`;
+            }
+        }
+
+        loadRunDetail();
+    </script>
+</body>
+</html>
