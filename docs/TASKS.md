@@ -51,7 +51,7 @@
 
 ## Milestone 5: Integrasi dengan OpenCode Agent
 - **ID**: M5
-- **Judul**: Mengintegrasikan konfigurasi dan agent OpenCode
+- **Judul**: [x] Mengintegrasikan konfigurasi dan agent OpenCode
 - **File terkait**:
   - opencode/agents/*.md
   - opencode/opencode.template.json

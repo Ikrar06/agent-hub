@@ -1,0 +1,6 @@
+{
+  "provider": "{{provider}}",
+  "model": {
+    "id": "{{modelId}}"
+  }
+}
