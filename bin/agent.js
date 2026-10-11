@@ -28,6 +28,39 @@ if (command === 'monitor') {
       process.exit(code);
     }
   });
+} else if (command === 'run') {
+  // Mock implementation for testing purposes
+  const mockMode = commandArgs.includes('--mock');
+  const yesFlag = commandArgs.includes('--yes');
+  const repoIndex = commandArgs.indexOf('--repo');
+  let repoPath = '.';
+
+  if (repoIndex !== -1 && repoIndex + 1 < commandArgs.length) {
+    repoPath = commandArgs[repoIndex + 1];
+  }
+
+  const inPlaceFlag = commandArgs.includes('--in-place');
+
+  if (mockMode) {
+    console.log(`[MOCK] Running agent in repository: ${repoPath}`);
+    console.log(`[MOCK] Prompt: "${commandArgs.slice(0, commandArgs.indexOf('--mock')).join(' ')}"`);
+    console.log(`[MOCK] Mock mode: ${mockMode}`);
+    console.log(`[MOCK] Yes flag: ${yesFlag}`);
+    console.log(`[MOCK] In-place: ${inPlaceFlag}`);
+
+    // Simulate some processing time
+    const startTime = Date.now();
+    while (Date.now() - startTime < 1000) {
+      // Busy wait for 1 second to simulate work
+    }
+
+    console.log('[MOCK] Agent run completed successfully (mock mode)');
+    process.exit(0);
+  } else {
+    console.log(`[ERROR] Real mode not implemented for 'run' command yet.`);
+    console.log(`[INFO] Use --mock flag for testing purposes.`);
+    process.exit(1);
+  }
 } else {
   console.log(`Command '${command}' is not implemented yet.`);
   printHelp();

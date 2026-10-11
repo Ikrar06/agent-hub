@@ -86,7 +86,7 @@
 
 ## Milestone 8: Uji End-to-End
 - **ID**: M8
-- **Judul**: Melakukan uji end-to-end dengan scenario mock dan nyata
+- **Judul**: [x] Melakukan uji end-to-end dengan scenario mock dan nyata
 - **File terkait**:
   - test/ (fixture repo dan uji node:test)
   - scripts/e2e-mock.js

@@ -1,6 +1,6 @@
 // monitor/server.js
 import { createServer } from 'node:http';
-import { stat, readdir } from 'node:fs/promises';
+import { stat, readdir, realpath } from 'node:fs/promises';
 import { join, parse, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +19,13 @@ const server = createServer(async (req, res) => {
     let filePath = join(PUBLIC_DIR, path === '/' ? 'index.html' : path);
     try {
       await stat(filePath);
+      // Prevent directory traversal attacks
+      const resolvedPath = await realpath(filePath);
+      if (!resolvedPath.startsWith(PUBLIC_DIR + (PUBLIC_DIR.endsWith('/') || PUBLIC_DIR.endsWith('\\') ? '' : '/'))) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
       // Serve file
       const ext = extname(filePath).toLowerCase();
       let contentType = 'text/html';

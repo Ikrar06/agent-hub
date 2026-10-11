@@ -49,23 +49,103 @@
 
                 // Display basic info
                 const infoDiv = document.getElementById('runInfo');
-                infoDiv.innerHTML = `
-                    <p><strong>Run ID:</strong> ${run.id || '-'}</p>
-                    <p><strong>Repository:</strong> ${run.repo || '-'}</p>
-                    <p><strong>Branch:</strong> ${run.branch || '-'}</p>
-                    <p><strong>Base SHA:</strong> ${run.base_sha || '-'}</p>
-                    <p><strong>Start Time:</strong> <span class="timestamp">${run.started_at ? new Date(run.started_at).toLocaleString() : '-'}</span></p>
-                    <p><strong>Last Heartbeat:</strong> <span class="timestamp">${run.last_heartbeat ? new Date(run.last_heartbeat).toLocaleString() : '-'}</span></p>
-                    <p><strong>Current Stage:</strong> ${run.stage || '-'}</p>
-                    <p><strong>Current Agent:</strong> ${run.agent || '-'}</p>
-                    <p><strong>Current Model:</strong> ${run.model || '-'}</p>
-                    <p><strong>Task Index:</strong> ${run.task_index !== undefined ? run.task_index + 1 : '-'}/${run.task_total || '-'}</p>
-                    <p><strong>Fix Round:</strong> ${run.fix_round || 0}</p>
-                    <p><strong>Review Round:</strong> ${run.review_round || 0}</p>
-                    <p><strong>State:</strong> <span class="status-${run.state || 'unknown'}">${run.state || '-'}</span></p>
-                    <p><strong>Message:</strong> ${run.message || '-'}</p>
-                    <p><strong>PR URL:</strong> ${run.pr_url ? `<a href="${run.pr_url}" target="_blank">View PR</a>` : '-'}</p>
-                `;
+                infoDiv.innerHTML = ''; // Clear existing content
+
+                const createParagraphWithLabel = (label, value, isHtml = false) => {
+                    const p = document.createElement('p');
+                    const strong = document.createElement('strong');
+                    strong.textContent = label;
+                    p.appendChild(strong);
+                    p.appendChild(document.createTextNode(' '));
+
+                    if (isHtml && typeof value === 'string' && value.includes('<a href=')) {
+                        // Handle the special case for PR URL
+                        const span = document.createElement('span');
+                        span.innerHTML = value; // This is safe as we control the value
+                        p.appendChild(span);
+                    } else {
+                        if (value instanceof DocumentFragment) {
+                            p.appendChild(value);
+                        } else {
+                            p.appendChild(document.createTextNode(value));
+                        }
+                    }
+                    return p;
+                };
+
+                // Add each piece of info
+                infoDiv.appendChild(createParagraphWithLabel('Run ID:', run.id || '-'));
+                infoDiv.appendChild(createParagraphWithLabel('Repository:', run.repo || '-'));
+                infoDiv.appendChild(createParagraphWithLabel('Branch:', run.branch || '-'));
+                infoDiv.appendChild(createParagraphWithLabel('Base SHA:', run.base_sha || '-'));
+
+                const startTimePara = document.createElement('p');
+                const startTimeStrong = document.createElement('strong');
+                startTimeStrong.textContent = 'Start Time:';
+                startTimePara.appendChild(startTimeStrong);
+                startTimePara.appendChild(document.createTextNode(' '));
+                const startTimeSpan = document.createElement('span');
+                startTimeSpan.className = 'timestamp';
+                startTimeSpan.textContent = run.started_at ? new Date(run.started_at).toLocaleString() : '-';
+                startTimePara.appendChild(startTimeSpan);
+                infoDiv.appendChild(startTimePara);
+
+                const lastHeartbeatPara = document.createElement('p');
+                const lastHeartbeatStrong = document.createElement('strong');
+                lastHeartbeatStrong.textContent = 'Last Heartbeat:';
+                lastHeartbeatPara.appendChild(lastHeartbeatStrong);
+                lastHeartbeatPara.appendChild(document.createTextNode(' '));
+                const lastHeartbeatSpan = document.createElement('span');
+                lastHeartbeatSpan.className = 'timestamp';
+                lastHeartbeatSpan.textContent = run.last_heartbeat ? new Date(run.last_heartbeat).toLocaleString() : '-';
+                lastHeartbeatPara.appendChild(lastHeartbeatSpan);
+                infoDiv.appendChild(lastHeartbeatPara);
+
+                infoDiv.appendChild(createParagraphWithLabel('Current Stage:', run.stage || '-'));
+                infoDiv.appendChild(createParagraphWithLabel('Current Agent:', run.agent || '-'));
+                infoDiv.appendChild(createParagraphWithLabel('Current Model:', run.model || '-'));
+
+                const taskIndexPara = document.createElement('p');
+                const taskIndexStrong = document.createElement('strong');
+                taskIndexStrong.textContent = 'Task Index:';
+                taskIndexPara.appendChild(taskIndexStrong);
+                taskIndexPara.appendChild(document.createTextNode(' '));
+                const taskIndexText = document.createTextNode(
+                    `${run.task_index !== undefined ? run.task_index + 1 : '-'}/${run.task_total || '-'}`);
+                taskIndexPara.appendChild(taskIndexText);
+                infoDiv.appendChild(taskIndexPara);
+
+                infoDiv.appendChild(createParagraphWithLabel('Fix Round:', run.fix_round || 0));
+                infoDiv.appendChild(createParagraphWithLabel('Review Round:', run.review_round || 0));
+
+                const statePara = document.createElement('p');
+                const stateStrong = document.createElement('strong');
+                stateStrong.textContent = 'State:';
+                statePara.appendChild(stateStrong);
+                statePara.appendChild(document.createTextNode(' '));
+                const stateSpan = document.createElement('span');
+                stateSpan.className = `status-${run.state || 'unknown'}`;
+                stateSpan.textContent = run.state || '-';
+                statePara.appendChild(stateSpan);
+                infoDiv.appendChild(statePara);
+
+                infoDiv.appendChild(createParagraphWithLabel('Message:', run.message || '-'));
+
+                const prUrlPara = document.createElement('p');
+                const prUrlStrong = document.createElement('strong');
+                prUrlStrong.textContent = 'PR URL:';
+                prUrlPara.appendChild(prUrlStrong);
+                prUrlPara.appendChild(document.createTextNode(' '));
+                if (run.pr_url) {
+                    const prLink = document.createElement('a');
+                    prLink.href = run.pr_url;
+                    prLink.target = '_blank';
+                    prLink.textContent = 'View PR';
+                    prUrlPara.appendChild(prLink);
+                } else {
+                    prUrlPara.appendChild(document.createTextNode('-'));
+                }
+                infoDiv.appendChild(prUrlPara);
 
                 // Try to load events.jsonl
                 try {

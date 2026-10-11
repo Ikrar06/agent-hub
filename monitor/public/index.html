@@ -50,15 +50,40 @@
 
                 runs.forEach(run => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${run.id || '-'}</td>
-                        <td>${run.repo || '-'}</td>
-                        <td>${run.branch || '-'}</td>
-                        <td>${run.stage || '-'}</td>
-                        <td>${run.agent || '-'}</td>
-                        <td>${run.model || '-'}</td>
-                        <td>${run.task_index !== undefined && run.task_total !== undefined ? `${run.task_index + 1}/${run.task_total}` : '-'}</td>
-                        <td class="status-${run.state || 'unknown'}">${run.state || '-'}</td>
+
+                    const idTd = document.createElement('td');
+                    idTd.textContent = run.id || '-';
+                    tr.appendChild(idTd);
+
+                    const repoTd = document.createElement('td');
+                    repoTd.textContent = run.repo || '-';
+                    tr.appendChild(repoTd);
+
+                    const branchTd = document.createElement('td');
+                    branchTd.textContent = run.branch || '-';
+                    tr.appendChild(branchTd);
+
+                    const stageTd = document.createElement('td');
+                    stageTd.textContent = run.stage || '-';
+                    tr.appendChild(stageTd);
+
+                    const agentTd = document.createElement('td');
+                    agentTd.textContent = run.agent || '-';
+                    tr.appendChild(agentTd);
+
+                    const modelTd = document.createElement('td');
+                    modelTd.textContent = run.model || '-';
+                    tr.appendChild(modelTd);
+
+                    const taskTd = document.createElement('td');
+                    taskTd.textContent = run.task_index !== undefined && run.task_total !== undefined ? `${run.task_index + 1}/${run.task_total}` : '-';
+                    tr.appendChild(taskTd);
+
+                    const statusTd = document.createElement('td');
+                    statusTd.className = `status-${run.state || 'unknown'}`;
+                    statusTd.textContent = run.state || '-';
+                    tr.appendChild(statusTd);
+
                     tr.onclick = () => {
                         window.location.href = `/run.html?id=${run.id}`;
                     };
