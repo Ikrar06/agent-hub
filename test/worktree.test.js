@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 const exec = promisify(execFile);
 
 describe('worktree', () => {
@@ -48,7 +49,7 @@ describe('worktree', () => {
     assert.ok(/^agent\/test-slug-\d{8}-\d{6}$/.test(result.branch));
     // 4. git worktree list --porcelain should include the worktree path
     const worktreeList = await exec('git', ['-C', repo, 'worktree', 'list', '--porcelain']);
-    const worktreeDir = result.dir.replace(/\\/g, '/');
+    const worktreeDir = realpathSync(result.dir).replace(/\\/g, '/');
     const found = worktreeList.stdout.split('\n').some(line => {
       const trimmed = line.trim();
       if (!trimmed.startsWith('worktree ')) return false;
@@ -56,17 +57,6 @@ describe('worktree', () => {
       const pathPartNormalized = pathPart.replace(/\\/g, '/');
       return pathPartNormalized === worktreeDir;
     });
-    console.log('worktreeList.stdout:', JSON.stringify(worktreeList.stdout));
-    console.log('worktreeDir:', worktreeDir);
-    const worktreeLines = worktreeList.stdout.split('\n');
-    for (const line of worktreeLines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('worktree ')) {
-        const pathPart = trimmed.slice('worktree '.length).trim();
-        const pathPartNormalized = pathPart.replace(/\\/g, '/');
-        console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> normalized: '${pathPartNormalized}'`);
-      }
-    }
     assert.ok(found);
     // 5. Original repo's HEAD should still be main
     const headResult = await exec('git', ['-C', repo, 'rev-parse', '--abbrev-ref', 'HEAD']);
