@@ -183,7 +183,7 @@ try {
   console.log('\n=== Test 10: Verify monitor functionality ===');
   try {
     // Start monitor in background, check it's running, then kill it
-    const monitorProcess = spawnSync('node', ['bin/agent.js', 'monitor', '--port', '3778'], {
+    const monitor = spawn('node', ['bin/agent.js', 'monitor', '--port', '3778'], {
       detached: true,
       stdio: 'ignore'
     });
@@ -203,7 +203,7 @@ try {
       } finally {
         // Kill the monitor process
         try {
-          process.kill(monitorProcess.pid);
+          monitor.kill();
         } catch (e) {/* ignore */ }
       }
     }, 1000);
