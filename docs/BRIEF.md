@@ -154,5 +154,25 @@ Setiap tahap direkam sebagai "stage". Di ${AGENT_HUB_HOME}/runs/<repo-key>/<run-
 - README maksimal 2 halaman: instal, lima menit pertama, alur `agent code .`, pindah repo, membaca monitor, troubleshooting, batasan model lokal.
 - Laporan akhir: apa yang sudah diuji (dan di OS mana), apa yang belum dan menunggu PC, dan apa yang tidak bisa direkam karena batasan OpenCode.
 
+# TAMBAHAN v3: VS CODE SEBAGAI UI UTAMA
+Tujuan: `agent code .` membuka repo di VS Code dan menyiapkan UI chat/kontrol di dalam VS Code. Panel web (v2 bagian 3) menjadi fallback berprioritas rendah.
+
+## Tahap A: agent code tanpa ekstensi buatan sendiri
+- `agent code [path]`: init repo, buka `code <path>`, pastikan ekstensi OpenCode resmi terpasang (cek `code --list-extensions`; pasang hanya dengan persetujuan saya via `code --install-extension <id>`; verifikasi ID di docs OpenCode dan Marketplace), lalu siapkan peluncuran otomatis `agent chat` di terminal terintegrasi.
+- Peluncuran otomatis: verifikasi di dokumentasi VS Code terbaru apakah task dengan `runOptions.runOn = "folderOpen"` didukung di tasks.json level user. Jika tidak, pakai `.vscode/tasks.json` workspace yang ditambahkan ke .git/info/exclude (tidak pernah ikut commit; merge dengan file yang ada, backup dulu). Catat di README prompt izin "automatic tasks" satu kali.
+- Config OpenCode hub dipasang oleh proses `agent chat` lewat env atau config per proses (verifikasi nama env di docs OpenCode). Jangan mengandalkan env dari `code`, karena instance VS Code yang sudah berjalan mengabaikannya.
+- Catat di README batasan jujur: chat tetap berupa TUI di terminal VS Code, bukan panel webview.
+- Monitor bisa dibuka di Simple Browser VS Code lewat task opsional.
+
+## Tahap B: ekstensi VS Code `agent-hub-vscode` (milestone baru, terakhir)
+- JavaScript polos (CommonJS), tanpa build step dan tanpa dependency runtime. Pemasangan lewat `agent vscode-install --extension` (idempotent, backup, ada uninstall).
+- Aktif otomatis saat folder dibuka (onStartupFinished), hanya bila repo terdaftar atau ada run terkait.
+- Panel sidebar (webview): (1) kotak prompt untuk memulai `agent run`; (2) timeline bergaya chat per stage: respons agent, status, durasi, putaran; (3) tombol Approve/Reject/Edit pada gate dengan SPEC/PR di samping; (4) kotak arahan (steer) ke agent berikutnya; (5) Stop/Resume.
+- Integrasi native: klik file di diff membuka editor diff VS Code (`vscode.diff`) pada worktree atau rekaman, status bar menampilkan state dan agent aktif, notifikasi saat waiting_gate, blocked, atau failed.
+- Komunikasi hanya lewat kanal kontrol file dan rekaman run (v2 bagian 2) serta spawn `agent` dengan argumen terpisah. Tidak ada eksekusi perintah arbitrer. Webview memakai CSP ketat, semua teks run di-escape, tidak ada innerHTML dari konten run.
+- Opsional, jika `opencode serve` menyediakan API sesi: chat bebas dengan satu agent di panel yang sama. Jika tidak, sediakan tombol "Buka OpenCode di terminal".
+- Hormati lock global (satu pemakai model pada satu waktu).
+- Uji: pisahkan logika dari API vscode agar bisa diuji dengan node:test. Uji manual masuk docs/PC-VERIFY.md.
+
 # URUTAN
-1) Rencana dan daftar keputusan, tunggu persetujuan. 2) Skeleton, CLAUDE.md, platform layer, doctor, CI. 3) Agent dan config OpenCode. 4) Driver, worktree, lock, rekaman stage, dan mock. 5) Integrasi VS Code. 6) Monitor (daftar, lalu detail run dan diff). 7) Dokumen serah terima (SETUP-PC, PC-VERIFY) dan README. 8) Uji end-to-end. 9) Laporan.
+1) Rencana dan daftar keputusan, tunggu persetujuan. 2) Skeleton, CLAUDE.md, platform layer, doctor, CI. 3) Agent dan config OpenCode. 4) Driver, worktree, lock, rekaman stage, dan mock. 5) Integrasi VS Code. 6) Monitor (daftar, lalu detail run dan diff). 7) Dokumen serah terima (SETUP-PC, PC-VERIFY) dan README. 8) Uji end-to-end. 9) Laporan. 10) Tahap A: VS Code tanpa ekstensi buatan sendiri. 11) Tahap B: Ekstensi VS Code `agent-hub-vscode`.
