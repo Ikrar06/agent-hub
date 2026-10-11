@@ -50,13 +50,17 @@ describe('worktree', () => {
     // 4. git worktree list --porcelain should include the worktree path
     const worktreeList = await exec('git', ['-C', repo, 'worktree', 'list', '--porcelain']);
     const worktreeDir = realpathSync(result.dir).replace(/\\/g, '/');
+    console.log('worktreeList.stdout:', JSON.stringify(worktreeList.stdout));
+    console.log('worktreeDir:', worktreeDir);
     const found = worktreeList.stdout.split('\n').some(line => {
       const trimmed = line.trim();
       if (!trimmed.startsWith('worktree ')) return false;
       const pathPart = trimmed.slice('worktree '.length).trim();
       const pathPartNormalized = pathPart.replace(/\\/g, '/');
+      console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> normalized: '${pathPartNormalized}'`);
       return pathPartNormalized === worktreeDir;
     });
+    console.log('found:', found);
     assert.ok(found);
     // 5. Original repo's HEAD should still be main
     const headResult = await exec('git', ['-C', repo, 'rev-parse', '--abbrev-ref', 'HEAD']);
