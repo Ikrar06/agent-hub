@@ -118,7 +118,7 @@
 
 ## Milestone 10: Tahap A - Integrasi VS Code Tanpa Ekstensi Buatan Sendiri
 - **ID**: M10
-- **Judul**: [ ] Siapkan peluncuran otomatis agent chat di terminal terintegrasi
+- **Judul**: [x] Siapkan peluncuran otomatis agent chat di terminal terintegrasi
 - **File terkait**:
   - bin/agent.js (agent chat command)
   - docs/SETUP-PC.md
