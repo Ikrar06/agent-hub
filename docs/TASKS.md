@@ -98,7 +98,7 @@
 
 ## Milestone 9: Laporan Akhir dan Persiapan Rilis
 - **ID**: M9
-- **Judul**: Membuat laporan akhir dan menyiapkan untuk verifikasi akhir
+- **Judul**: [x] Membuat laporan akhir dan menyiapkan untuk verifikasi akhir
 - **File terkait**: Tidak ada file baru, tetapi dokumentasi existentes diperbarui jika perlu.
 - **Acceptance check**:
   - Laporan akhir yang mencakup apa yang telah diuji (dan di OS mana), apa yang belum dan menunggu PC, dan apa yang tidak bisa direkam karena batasan OpenCode telah dibuat.
