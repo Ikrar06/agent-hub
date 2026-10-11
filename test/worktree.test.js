@@ -58,8 +58,8 @@ describe('worktree', () => {
     });
     console.log('worktreeList.stdout:', JSON.stringify(worktreeList.stdout));
     console.log('worktreeDir:', worktreeDir);
-    const lines = worktreeList.stdout.split('\n');
-    for (const line of lines) {
+    const worktreeLines = worktreeList.stdout.split('\n');
+    for (const line of worktreeLines) {
       const trimmed = line.trim();
       if (trimmed.startsWith('worktree ')) {
         const pathPart = trimmed.slice('worktree '.length).trim();
@@ -74,9 +74,9 @@ describe('worktree', () => {
     // 6. Original repo's status should show dirty.txt as untracked and no other changes
     const statusResult = await exec('git', ['-C', repo, 'status', '--porcelain']);
     // Expect: ?? dirty.txt
-    const lines = statusResult.stdout.trim().split('\n').filter(line => line.trim() !== '');
-    assert.equal(lines.length, 1);
-    assert.equal(lines[0], '?? dirty.txt');
+    const statusLines = statusResult.stdout.trim().split('\n').filter(line => line.trim() !== '');
+    assert.equal(statusLines.length, 1);
+    assert.equal(statusLines[0], '?? dirty.txt');
 
     // Clean up: remove the worktree
     await removeWorktree({ home, dir: result.dir });
