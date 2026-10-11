@@ -51,7 +51,10 @@ describe('worktree', () => {
     const worktreeDir = result.dir.replace(/\\/g, '/');
     const found = worktreeList.stdout.split('\n').some(line => {
       const trimmed = line.trim();
-      return trimmed.startsWith('worktree ') && trimmed.slice('worktree '.length).trim() === worktreeDir;
+      if (!trimmed.startsWith('worktree ')) return false;
+      const pathPart = trimmed.slice('worktree '.length).trim();
+      const pathPartNormalized = pathPart.replace(/\\/g, '/');
+      return pathPartNormalized === worktreeDir;
     });
     assert.ok(found);
     // 5. Original repo's HEAD should still be main
