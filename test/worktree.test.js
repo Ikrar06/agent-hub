@@ -8,6 +8,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { realpathSync } from 'node:fs';
+import { stat } from 'node:fs/promises';
 const exec = promisify(execFile);
 
 describe('worktree', () => {
@@ -52,20 +53,23 @@ describe('worktree', () => {
     const worktreeDir = realpathSync(result.dir).replace(/\\/g, '/');
     console.log('worktreeList.stdout:', JSON.stringify(worktreeList.stdout));
     console.log('worktreeDir:', worktreeDir);
-    const found = worktreeList.stdout.split('\n').some(line => {
+    const lines = worktreeList.stdout.split('\n');
+    let found = false;
+    for (const line of lines) {
       const trimmed = line.trim();
-      if (!trimmed.startsWith('worktree ')) return false;
+      if (!trimmed.startsWith('worktree ')) continue;
       const pathPart = trimmed.slice('worktree '.length).trim();
-      let pathPartNormalized;
       try {
-        pathPartNormalized = realpathSync(pathPart).replace(/\\/g, '/');
+        const stat1 = await stat(pathPart);
+        const stat2 = await stat(worktreeDir);
+        if (stat1.dev === stat2.dev && stat1.ino === stat2.ino) {
+          found = true;
+          break;
+        }
       } catch (err) {
-        // Fallback to simple slash normalization if realpath fails
-        pathPartNormalized = pathPart.replace(/\\/g, '/');
+        // ignore errors (e.g., file not found)
       }
-      console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> realpath: '${pathPartNormalized}'`);
-      return pathPartNormalized === worktreeDir;
-    });
+    }
     console.log('found:', found);
     assert.ok(found);
     // 5. Original repo's HEAD should still be main
