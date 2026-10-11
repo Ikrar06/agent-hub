@@ -26,7 +26,7 @@
 
 ## Milestone 3: Implementasi CLI Agent
 - **ID**: M3
-- **Judul**: Mengimplementasikan CLI agent
+- **Judul**: [x] Mengimplementasikan CLI agent
 - **File terkait**:
   - bin/agent.js
   - src/cli/ (dan subdirektori terkait)
