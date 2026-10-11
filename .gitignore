@@ -3,3 +3,7 @@ npm-debug.log*
 .DS_Store
 .remember/
 *.log
+*.vsix
+CLAUDE.md
+TASKS.md
+PLAN.md

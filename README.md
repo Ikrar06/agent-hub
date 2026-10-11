@@ -34,7 +34,22 @@ Setelah instalasi:
    agent run "Tambahkan fitur X"
    ```
    Tahap pipeline akan berjalan otomatis (intake, perencanaan, coding, testing, dll.).
-5. Buka monitor web di http://127.0.0.1:3777 untuk melihat progres run secara real-time.
+5. Jalankan `agent vscode-install --extension` untuk menginstal ekstensi VS Code Agent Hub.
+6. Buka monitor web di http://127.0.0.1:3777 untuk melihat progres run secara real-time.
+
+## Ekstensi VS Code `agent-hub-vscode`
+
+Agent Hub juga menyediakan ekstensi VSCode yang memberikan panel sidebar untuk mengontrol agent runs. Untuk menginstal ekstensi ini:
+
+1. Pastikan Anda telah menjalankan `agent vscode-install --extension` setelah instalasi agent-hub
+2. Buka VS Code dan pastikan panel "Agent Hub" terlihat di sidebar
+3. Panel ini menyediakan:
+   - Kotak prompt untuk memulai agent run ( Cmd/Ctrl+Enter untuk menjalankan)
+   - Daftar run real-time langsung dari monitor web (klik untuk membuka detail run)
+   - Status, progress bar, dan timeline aktivitas agent
+   - Kontrol gate (waiting_gate/blocked) dengan callout peringatan
+   - Tombol stop/resume untuk mengontrol agent
+4. URL monitor dapat diubah melalui setting VS Code `agentHub.monitorUrl` (default `http://127.0.0.1:3777`)
 
 ## Alur Kerja Umum
 
