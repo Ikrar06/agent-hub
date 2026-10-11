@@ -34,7 +34,11 @@ jobs:
     - name: Verify documentation
       run: |
         echo "Checking that required documentation files exist..."
-        ls -la docs/BRIEF.md docs/PLAN.md docs/TASKS.md
+        if [ "${RUNNER_OS}" = "Windows" ]; then
+          dir docs/BRIEF.md docs/PLAN.md docs/TASKS.md
+        else
+          ls -la docs/BRIEF.md docs/PLAN.md docs/TASKS.md
+        fi
 
     - name: Verify agent command availability
       run: |
