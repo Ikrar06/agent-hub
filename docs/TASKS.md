@@ -10,7 +10,7 @@
 
 ## Milestone 2: Skeleton Repositori dan File Dasar
 - **ID**: M2
-- **Judul**: Menyiapkan struktur repositori dan file dasar
+- **Judul**: [x] Menyiapkan struktur repositori dan file dasar
 - **File terkait**: 
   - README.md
   - CLAUDE.md

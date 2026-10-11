@@ -1,0 +1,7 @@
+{
+  "llamaServerPath": "/path/to/llama-server",
+  "ggufPath": "/path/to/model.Q4_K_M.gguf",
+  "modelProfile": "qwen",
+  "nCpuMoe": 4,
+  "ctx": 32768
+}
