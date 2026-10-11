@@ -56,6 +56,17 @@ describe('worktree', () => {
       const pathPartNormalized = pathPart.replace(/\\/g, '/');
       return pathPartNormalized === worktreeDir;
     });
+    console.log('worktreeList.stdout:', JSON.stringify(worktreeList.stdout));
+    console.log('worktreeDir:', worktreeDir);
+    const lines = worktreeList.stdout.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('worktree ')) {
+        const pathPart = trimmed.slice('worktree '.length).trim();
+        const pathPartNormalized = pathPart.replace(/\\/g, '/');
+        console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> normalized: '${pathPartNormalized}'`);
+      }
+    }
     assert.ok(found);
     // 5. Original repo's HEAD should still be main
     const headResult = await exec('git', ['-C', repo, 'rev-parse', '--abbrev-ref', 'HEAD']);
