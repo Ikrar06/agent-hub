@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Toolkit CLI lintas platform untuk menjalankan pipeline multi-agent coding lokal",
   "main": "src/index.js",
+  "type": "module",
   "bin": {
     "agent": "bin/agent.js"
   },

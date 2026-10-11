@@ -37,7 +37,7 @@
 
 ## Milestone 4: Pipeline Multi-Agent dan Isolasi Worktree
 - **ID**: M4
-- **Judul**: Membuat pipeline multi-agent dan mekanisme isolasi worktree
+- **Judul**: [x] Membuat pipeline multi-agent dan mekanisme isolasi worktree
 - **File terkait**:
   - src/pipeline/ (dan file terkait)
   - src/worktree/
