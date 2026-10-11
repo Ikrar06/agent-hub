@@ -32,13 +32,10 @@ jobs:
       run: node scripts/e2e-mock.js
 
     - name: Verify documentation
+      shell: bash
       run: |
         echo "Checking that required documentation files exist..."
-        if [ "${RUNNER_OS}" = "Windows" ]; then
-          dir docs/BRIEF.md docs/PLAN.md docs/TASKS.md
-        else
-          ls -la docs/BRIEF.md docs/PLAN.md docs/TASKS.md
-        fi
+        ls -la docs/BRIEF.md docs/PLAN.md docs/TASKS.md
 
     - name: Verify agent command availability
       run: |
