@@ -56,8 +56,14 @@ describe('worktree', () => {
       const trimmed = line.trim();
       if (!trimmed.startsWith('worktree ')) return false;
       const pathPart = trimmed.slice('worktree '.length).trim();
-      const pathPartNormalized = pathPart.replace(/\\/g, '/');
-      console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> normalized: '${pathPartNormalized}'`);
+      let pathPartNormalized;
+      try {
+        pathPartNormalized = realpathSync(pathPart).replace(/\\/g, '/');
+      } catch (err) {
+        // Fallback to simple slash normalization if realpath fails
+        pathPartNormalized = pathPart.replace(/\\/g, '/');
+      }
+      console.log(`line: '${line}' -> trimmed: '${trimmed}' -> pathPart: '${pathPart}' -> realpath: '${pathPartNormalized}'`);
       return pathPartNormalized === worktreeDir;
     });
     console.log('found:', found);
